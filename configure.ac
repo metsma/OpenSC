@@ -9,7 +9,7 @@ define([PRODUCT_URL], [https://github.com/OpenSC/OpenSC])
 define([PACKAGE_VERSION_MAJOR], [0])
 define([PACKAGE_VERSION_MINOR], [19])
 define([PACKAGE_VERSION_FIX], [0])
-define([PACKAGE_SUFFIX], [])
+define([PACKAGE_SUFFIX], [.5])
 
 define([VS_FF_LEGAL_COPYRIGHT], [OpenSC Project])
 define([VS_FF_LEGAL_COMPANY_NAME], [OpenSC Project])
@@ -358,7 +358,7 @@ fi
 AC_MSG_RESULT([${GIT_CHECKOUT}])
 
 if test "${GIT_CHECKOUT}" = "yes"; then
-	REVISION_DESCRIPTION="$(${GIT} describe || echo '<version not available>' )"
+	REVISION_DESCRIPTION="$(${GIT} describe --tags || echo '<version not available>' )"
 	if test "${REVISION_DESCRIPTION}" = "<version not available>"; then
 		REVISION_DESCRIPTION="$(${GIT} describe --tags || echo '<version not available>')"
 	fi

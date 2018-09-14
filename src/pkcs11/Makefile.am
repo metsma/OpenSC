@@ -19,10 +19,10 @@ OPENSC_PKCS11_SRC = pkcs11-global.c pkcs11-session.c pkcs11-object.c misc.c slot
 OPENSC_PKCS11_CFLAGS = \
 	$(OPTIONAL_OPENSSL_CFLAGS) $(OPENSC_PKCS11_PTHREAD_CFLAGS)
 OPENSC_PKCS11_LIBS = \
-	$(top_builddir)/src/libopensc/libopensc.la \
+	$(top_builddir)/src/libopensc/.libs/libopensc.a \
 	$(top_builddir)/src/common/libscdl.la \
 	$(top_builddir)/src/common/libcompat.la \
-	$(OPTIONAL_OPENSSL_LIBS) $(PTHREAD_LIBS)
+	$(OPTIONAL_OPENSSL_LIBS) $(PTHREAD_LIBS) $(OPTIONAL_ZLIB_LIBS) $(OPENPACE_LIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = opensc-pkcs11.pc

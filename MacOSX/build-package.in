@@ -7,7 +7,7 @@
 # You need to install the following packages from homebrew or macports or fink:
 # autoconf automake libtool pkg-config help2man gengetopt
 
-export MACOSX_DEPLOYMENT_TARGET="10.10"
+export MACOSX_DEPLOYMENT_TARGET="10.11"
 
 set -ex
 test -x ./configure || ./bootstrap
@@ -43,18 +43,18 @@ if ! pkg-config libcrypto --atleast-version=1.0.1; then
 	export OPENSSL_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openssl_bin pkg-config --static --libs   libcrypto`"
 fi
 
-if ! test -e $BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig; then
-	if ! test -e openpace; then
-		git clone --depth=1 https://github.com/frankmorgner/openpace.git
-	fi
-	cd openpace
-	autoreconf -vis
-	./configure --disable-shared --prefix=$PREFIX CRYPTO_CFLAGS="$OPENSSL_CFLAGS" CRYPTO_LIBS="$OPENSSL_LIBS"
-	make DESTDIR=$BUILDPATH/openpace_bin install
-	cd ..
-	export OPENPACE_CFLAGS="`env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --cflags libeac` $OPENSSL_CFLAGS"
-	export OPENPACE_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --libs   libeac` $OPENSSL_LIBS"
-fi
+#if ! test -e $BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig; then
+#	if ! test -e openpace; then
+#		git clone --depth=1 https://github.com/frankmorgner/openpace.git
+#	fi
+#	cd openpace
+#	autoreconf -vis
+#	./configure --disable-shared --prefix=$PREFIX CRYPTO_CFLAGS="$OPENSSL_CFLAGS" CRYPTO_LIBS="$OPENSSL_LIBS"
+#	make DESTDIR=$BUILDPATH/openpace_bin install
+#	cd ..
+#	export OPENPACE_CFLAGS="`env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --cflags libeac` $OPENSSL_CFLAGS"
+#	export OPENPACE_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --libs   libeac` $OPENSSL_LIBS"
+#fi
 
 if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 	./configure --prefix=$PREFIX \
@@ -65,9 +65,11 @@ if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 		--disable-dependency-tracking \
 		--enable-shared \
 		--enable-static \
-		--enable-strict \
+		--disable-strict \
 		--disable-assert \
-		--enable-sm # TODO: remove this (must be sensible default in master)
+		--disable-notify \
+		--disable-openpace \
+		--disable-sm # TODO: remove this (must be sensible default in master)
 
 	# always make clean
 	make clean
@@ -96,7 +98,7 @@ fi
 test -L OpenSC.tokend/build/opensc-src || ln -sf ${BUILDPATH}/src OpenSC.tokend/build/opensc-src
 
 # Build and copy OpenSC.tokend
-xcodebuild -target OpenSC -configuration Deployment -project OpenSC.tokend/Tokend.xcodeproj install DSTROOT=${BUILDPATH}/target_tokend
+#xcodebuild -target OpenSC -configuration Deployment -project OpenSC.tokend/Tokend.xcodeproj install DSTROOT=${BUILDPATH}/target_tokend
 
 #if ! test -e $BUILDPATH/target/Library/Security/tokend/OpenSC.tokend/Contents/Resources/Applications/terminal-notifier.app; then
 	#if ! test -e terminal-notifier-1.7.1.zip; then
@@ -109,12 +111,12 @@ xcodebuild -target OpenSC -configuration Deployment -project OpenSC.tokend/Token
 	#cp -r terminal-notifier-1.7.1/terminal-notifier.app $BUILDPATH/target/Library/Security/tokend/OpenSC.tokend/Contents/Resources/Applications
 #fi
 
-if ! test -e NotificationProxy; then
-	git clone http://github.com/frankmorgner/NotificationProxy.git
-fi
-xcodebuild -target NotificationProxy -configuration Release -project NotificationProxy/NotificationProxy.xcodeproj install DSTROOT=$BUILDPATH/target_tokend/Library/Security/tokend/OpenSC.tokend/Contents/Resources/
-mkdir -p "$BUILDPATH/target/Applications"
-osacompile -o "$BUILDPATH/target/Applications/OpenSC Notify.app" "MacOSX/OpenSC_Notify.applescript"
+#if ! test -e NotificationProxy; then
+	#git clone http://github.com/frankmorgner/NotificationProxy.git
+#fi
+#xcodebuild -target NotificationProxy -configuration Release -project NotificationProxy/NotificationProxy.xcodeproj install DSTROOT=$BUILDPATH/target_tokend/Library/Security/tokend/OpenSC.tokend/Contents/Resources/
+#mkdir -p "$BUILDPATH/target/Applications"
+#osacompile -o "$BUILDPATH/target/Applications/OpenSC Notify.app" "MacOSX/OpenSC_Notify.applescript"
 
 imagedir=$(mktemp -d)
 

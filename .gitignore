@@ -110,3 +110,9 @@ src/tests/prngtest
 src/tests/p11test/p11test
 
 version.m4.ci
+openpace_bin
+openssl_bin
+OpenSC Uninstaller.app
+org.opensc-project.opensc-notify.desktop
+test-driver
+Welcome.html
