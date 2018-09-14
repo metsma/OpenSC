@@ -117,3 +117,9 @@ tests/*.log
 tests/*.trs
 
 version.m4.ci
+openpace_bin
+openssl_bin
+OpenSC Uninstaller.app
+org.opensc-project.opensc-notify.desktop
+test-driver
+Welcome.html

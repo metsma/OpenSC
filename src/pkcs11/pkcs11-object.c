@@ -115,11 +115,6 @@ CK_RV sc_create_object_int(CK_SESSION_HANDLE hSession,	/* the session's handle *
 		goto out;
 	}
 
-	if (session->slot->token_info.flags & CKF_WRITE_PROTECTED) {
-		rv = CKR_TOKEN_WRITE_PROTECTED;
-		goto out;
-	}
-
 	card = session->slot->p11card;
 	if (card->framework->create_object == NULL)
 		rv = CKR_FUNCTION_NOT_SUPPORTED;
