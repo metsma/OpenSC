@@ -73,13 +73,15 @@ static struct sc_card_driver iasecc_drv = {
 static const struct sc_atr_table iasecc_known_atrs[] = {
 	{ "3B:7F:96:00:00:00:31:B8:64:40:70:14:10:73:94:01:80:82:90:00",
 	  "FF:FF:FF:FF:FF:FF:FF:FE:FF:FF:00:00:FF:FF:FF:FF:FF:FF:FF:FF",
-		"IAS/ECC Gemalto", SC_CARD_TYPE_IASECC_GEMALTO,  0, NULL },
-        { "3B:DD:18:00:81:31:FE:45:80:F9:A0:00:00:00:77:01:08:00:07:90:00:FE", NULL,
-		"IAS/ECC v1.0.1 Oberthur", SC_CARD_TYPE_IASECC_OBERTHUR,  0, NULL },
+		"IAS/ECC Gemalto", SC_CARD_TYPE_IASECC_GEMALTO, 0, NULL },
+	{ "3B:DD:18:00:81:31:FE:45:80:F9:A0:00:00:00:77:01:08:00:07:90:00:FE", NULL,
+		"IAS/ECC v1.0.1 Oberthur", SC_CARD_TYPE_IASECC_OBERTHUR, 0, NULL },
+	{ "3B:DB:96:00:80:B1:FE:45:1F:83:00:12:23:3F:53:65:49:44:0F:90:00:F1", NULL,
+		"IAS/ECC v1.0.1 Oberthur (EstEID)", SC_CARD_TYPE_IASECC_OBERTHUR, 0, NULL },
 	{ "3B:7D:13:00:00:4D:44:57:2D:49:41:53:2D:43:41:52:44:32", NULL,
-		"IAS/ECC v1.0.1 Sagem MDW-IAS-CARD2", SC_CARD_TYPE_IASECC_SAGEM,  0, NULL },
+		"IAS/ECC v1.0.1 Sagem MDW-IAS-CARD2", SC_CARD_TYPE_IASECC_SAGEM, 0, NULL },
 	{ "3B:7F:18:00:00:00:31:B8:64:50:23:EC:C1:73:94:01:80:82:90:00", NULL,
-		"IAS/ECC v1.0.1 Sagem ypsID S3", SC_CARD_TYPE_IASECC_SAGEM,  0, NULL },
+		"IAS/ECC v1.0.1 Sagem ypsID S3", SC_CARD_TYPE_IASECC_SAGEM, 0, NULL },
 	{ "3B:DF:96:00:80:31:FE:45:00:31:B8:64:04:1F:EC:C1:73:94:01:80:82:90:00:EC", NULL,
 		"IAS/ECC Morpho MinInt - Agent Card", SC_CARD_TYPE_IASECC_MI, 0, NULL },
 	{ "3B:DF:18:FF:81:91:FE:1F:C3:00:31:B8:64:0C:01:EC:C1:73:94:01:80:82:90:00:B3", NULL,
@@ -445,16 +447,24 @@ iasecc_oberthur_match(struct sc_card *card)
 {
 	struct sc_context *ctx = card->ctx;
 	unsigned char *hist = card->reader->atr_info.hist_bytes;
+	static const unsigned char EstEIDHist[] = {0x00, 0x12, 0x23, 0x3F, 0x53, 0x65, 0x49, 0x44, 0x0F, 0x90, 0x00};
 
 	LOG_FUNC_CALLED(ctx);
 
-	if (*hist != 0x80 || ((*(hist+1)&0xF0) != 0xF0))
-		LOG_FUNC_RETURN(ctx, SC_ERROR_OBJECT_NOT_FOUND);
+	if(memcmp(hist, EstEIDHist, sizeof(EstEIDHist)) == 0) {
+		sc_log(ctx, "IAS/ECC Oberthur EstEID card");
+		_sc_card_add_ec_alg(card, 384,
+			SC_ALGORITHM_ECDSA_RAW | SC_ALGORITHM_ECDH_CDH_RAW | SC_ALGORITHM_ECDSA_HASH_NONE,
+			SC_ALGORITHM_EXT_EC_NAMEDCURVE | SC_ALGORITHM_EXT_EC_UNCOMPRESES, NULL);
+	} else {
+		if (*hist != 0x80 || ((*(hist+1)&0xF0) != 0xF0))
+			LOG_FUNC_RETURN(ctx, SC_ERROR_OBJECT_NOT_FOUND);
 
-	sc_log_hex(ctx, "AID in historical_bytes", hist + 2, *(hist+1) & 0x0F);
+		sc_log_hex(ctx, "AID in historical_bytes", hist + 2, *(hist+1) & 0x0F);
 
-	if (memcmp(hist + 2, OberthurIASECC_AID.value, *(hist+1) & 0x0F))
-		LOG_FUNC_RETURN(ctx, SC_ERROR_RECORD_NOT_FOUND);
+		if (memcmp(hist + 2, OberthurIASECC_AID.value, *(hist+1) & 0x0F))
+			LOG_FUNC_RETURN(ctx, SC_ERROR_RECORD_NOT_FOUND);
+	}
 
 	if (!card->ef_atr)
 		card->ef_atr = calloc(1, sizeof(struct sc_ef_atr));
