@@ -106,7 +106,7 @@ static int esteid_select(struct sc_card *card, unsigned char p1, unsigned char i
 
 static int esteid_select_file(struct sc_card *card, const struct sc_path *in_path, struct sc_file **file_out) {
 	unsigned char pathbuf[SC_MAX_PATH_SIZE], *path = pathbuf;
-	int pathlen;
+	size_t pathlen;
 	struct sc_file *file = NULL;
 
 	LOG_FUNC_CALLED(card->ctx);
