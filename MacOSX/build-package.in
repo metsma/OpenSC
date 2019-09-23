@@ -7,7 +7,7 @@
 # You need to install the following packages from homebrew or macports or fink:
 # autoconf automake libtool pkg-config help2man gengetopt
 
-export MACOSX_DEPLOYMENT_TARGET="10.10"
+export MACOSX_DEPLOYMENT_TARGET="10.11"
 
 set -ex
 test -x ./configure || ./bootstrap
@@ -43,18 +43,18 @@ if ! pkg-config libcrypto --atleast-version=1.0.1; then
 	export OPENSSL_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openssl_bin pkg-config --static --libs   libcrypto`"
 fi
 
-if ! test -e $BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig; then
-	if ! test -e openpace; then
-		git clone --depth=1 https://github.com/frankmorgner/openpace.git -b 1.1.0
-	fi
-	cd openpace
-	autoreconf -vis
-	./configure --disable-shared --prefix=$PREFIX CRYPTO_CFLAGS="$OPENSSL_CFLAGS" CRYPTO_LIBS="$OPENSSL_LIBS"
-	make DESTDIR=$BUILDPATH/openpace_bin install
-	cd ..
-fi
-export OPENPACE_CFLAGS="`env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --cflags libeac` $OPENSSL_CFLAGS"
-export OPENPACE_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --libs   libeac` $OPENSSL_LIBS"
+#if ! test -e $BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig; then
+#	if ! test -e openpace; then
+#		git clone --depth=1 https://github.com/frankmorgner/openpace.git -b 1.1.0
+#	fi
+#	cd openpace
+#	autoreconf -vis
+#	./configure --disable-shared --prefix=$PREFIX CRYPTO_CFLAGS="$OPENSSL_CFLAGS" CRYPTO_LIBS="$OPENSSL_LIBS"
+#	make DESTDIR=$BUILDPATH/openpace_bin install
+#	cd ..
+#fi
+#export OPENPACE_CFLAGS="`env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --cflags libeac` $OPENSSL_CFLAGS"
+#export OPENPACE_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --libs   libeac` $OPENSSL_LIBS"
 
 if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 	./configure --prefix=$PREFIX \
@@ -65,9 +65,11 @@ if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 		--disable-dependency-tracking \
 		--enable-shared \
 		--enable-static \
-		--enable-strict \
+		--disable-strict \
 		--disable-assert \
-		--enable-sm # TODO: remove this (must be sensible default in master)
+		--disable-notify \
+		--disable-openpace \
+		--disable-sm # TODO: remove this (must be sensible default in master)
 
 	# always make clean
 	make clean
@@ -95,16 +97,15 @@ xcodebuild -target NotificationProxy -configuration Release -project Notificatio
 mkdir -p "$BUILDPATH/target/Applications"
 osacompile -o "$BUILDPATH/target/Applications/OpenSC Notify.app" "MacOSX/OpenSC_Notify.applescript"
 
-
-# Check out OpenSC.tokend, if not already fetched.
-if ! test -e OpenSC.tokend; then
-	git clone http://github.com/OpenSC/OpenSC.tokend.git
-fi
-
-# Create the symlink to OpenSC sources
-test -L OpenSC.tokend/build/opensc-src || ln -sf ${BUILDPATH}/src OpenSC.tokend/build/opensc-src
-
 if (( xcodebuild -version | sed -En 's/Xcode[[:space:]]+([0-9]+)\.[0-9]*/\1/p' < 10 )); then
+	# Check out OpenSC.tokend, if not already fetched.
+	if ! test -e OpenSC.tokend; then
+		git clone http://github.com/OpenSC/OpenSC.tokend.git
+	fi
+
+	# Create the symlink to OpenSC sources
+	test -L OpenSC.tokend/build/opensc-src || ln -sf ${BUILDPATH}/src OpenSC.tokend/build/opensc-src
+
 	# Build and copy OpenSC.tokend
 	xcodebuild -target OpenSC -configuration Deployment -project OpenSC.tokend/Tokend.xcodeproj install DSTROOT=${BUILDPATH}/target_tokend
 else
