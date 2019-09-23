@@ -7,7 +7,7 @@
 # You need to install the following packages from homebrew or macports or fink:
 # autoconf automake libtool pkg-config help2man gengetopt
 
-export MACOSX_DEPLOYMENT_TARGET="10.10"
+export MACOSX_DEPLOYMENT_TARGET="10.13"
 
 set -ex
 test -x ./configure || ./bootstrap
@@ -41,19 +41,19 @@ if ! pkg-config libcrypto --atleast-version=1.0.1; then
 	export OPENSSL_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openssl_bin pkg-config --static --libs   libcrypto`"
 fi
 
-if ! test -e $BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig; then
-	if ! test -e openpace; then
-		git clone --depth=1 https://github.com/frankmorgner/openpace.git -b 1.1.0
-	fi
-	cd openpace
-	autoreconf -vis
-	./configure --disable-shared --prefix=$PREFIX CRYPTO_CFLAGS="$OPENSSL_CFLAGS" CRYPTO_LIBS="$OPENSSL_LIBS" HELP2MAN=/usr/bin/true
-	touch src/cvc-create.1 src/cvc-print.1
-	make DESTDIR=$BUILDPATH/openpace_bin install
-	cd ..
-fi
-export OPENPACE_CFLAGS="`env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --cflags libeac` $OPENSSL_CFLAGS"
-export OPENPACE_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --libs   libeac` $OPENSSL_LIBS"
+#if ! test -e $BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig; then
+#	if ! test -e openpace; then
+#		git clone --depth=1 https://github.com/frankmorgner/openpace.git -b 1.1.0
+#	fi
+#	cd openpace
+#	autoreconf -vis
+#	./configure --disable-shared --prefix=$PREFIX CRYPTO_CFLAGS="$OPENSSL_CFLAGS" CRYPTO_LIBS="$OPENSSL_LIBS" HELP2MAN=/usr/bin/true
+#	touch src/cvc-create.1 src/cvc-print.1
+#	make DESTDIR=$BUILDPATH/openpace_bin install
+#	cd ..
+#fi
+#export OPENPACE_CFLAGS="`env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --cflags libeac` $OPENSSL_CFLAGS"
+#export OPENPACE_LIBS="`  env PKG_CONFIG_PATH=$BUILDPATH/openssl_bin/$PREFIX/lib/pkgconfig:$BUILDPATH/openpace_bin/$PREFIX/lib/pkgconfig PKG_CONFIG_SYSROOT_DIR=$BUILDPATH/openpace_bin pkg-config --static --libs   libeac` $OPENSSL_LIBS"
 
 if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 	./configure --prefix=$PREFIX \
@@ -64,9 +64,11 @@ if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 		--disable-dependency-tracking \
 		--enable-shared \
 		--enable-static \
-		--enable-strict \
+		--disable-strict \
 		--disable-assert \
-		--enable-sm # TODO: remove this (must be sensible default in master)
+		--disable-notify \
+		--disable-openpace \
+		--disable-sm # TODO: remove this (must be sensible default in master)
 
 	# always make clean
 	make clean
@@ -87,20 +89,20 @@ if ! test -e ${BUILDPATH}/target/$PREFIX/lib/pkgconfig; then
 fi
 
 
-if ! test -e NotificationProxy; then
-	git clone http://github.com/frankmorgner/NotificationProxy.git
-fi
-if test -n "${CODE_SIGN_IDENTITY}" -a -n "${DEVELOPMENT_TEAM}"; then
-	xcodebuild -target NotificationProxy -configuration Release -project NotificationProxy/NotificationProxy.xcodeproj install DSTROOT=$BUILDPATH/target/Library/OpenSC/ \
-		CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY}" DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM}" OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime" CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO CODE_SIGN_STYLE=Manual
-else
-	xcodebuild -target NotificationProxy -configuration Release -project NotificationProxy/NotificationProxy.xcodeproj install DSTROOT=$BUILDPATH/target/Library/OpenSC/
-fi
-mkdir -p "$BUILDPATH/target/Applications/Utilities"
-osacompile -o "$BUILDPATH/target/Applications/Utilities/OpenSC Notify.app" "MacOSX/OpenSC_Notify.applescript"
-if test -n "${CODE_SIGN_IDENTITY}"; then
-	codesign --force --sign "${CODE_SIGN_IDENTITY}" --entitlements MacOSX/OpenSC_Uninstaller.entitlements --deep --timestamp --options runtime "$BUILDPATH/target/Applications/Utilities/OpenSC Notify.app"
-fi
+#if ! test -e NotificationProxy; then
+#	git clone http://github.com/frankmorgner/NotificationProxy.git
+#fi
+#if test -n "${CODE_SIGN_IDENTITY}" -a -n "${DEVELOPMENT_TEAM}"; then
+#	xcodebuild -target NotificationProxy -configuration Release -project NotificationProxy/NotificationProxy.xcodeproj install DSTROOT=$BUILDPATH/target/Library/OpenSC/ \
+#		CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY}" DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM}" OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime" CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO CODE_SIGN_STYLE=Manual
+#else
+#	xcodebuild -target NotificationProxy -configuration Release -project NotificationProxy/NotificationProxy.xcodeproj install DSTROOT=$BUILDPATH/target/Library/OpenSC/
+#fi
+#mkdir -p "$BUILDPATH/target/Applications/Utilities"
+#osacompile -o "$BUILDPATH/target/Applications/Utilities/OpenSC Notify.app" "MacOSX/OpenSC_Notify.applescript"
+#if test -n "${CODE_SIGN_IDENTITY}"; then
+#	codesign --force --sign "${CODE_SIGN_IDENTITY}" --entitlements MacOSX/OpenSC_Uninstaller.entitlements --deep --timestamp --options runtime "$BUILDPATH/target/Applications/Utilities/OpenSC Notify.app"
+#fi
 
 
 # Build OpenSC.tokend when XCode version < 10
@@ -143,9 +145,9 @@ mkdir -p ${BUILDPATH}/target/usr/local/bin
 cp MacOSX/opensc-uninstall ${BUILDPATH}/target/usr/local/bin
 
 # Prepare startup root
-mkdir -p ${BUILDPATH}/target_startup/Library/LaunchAgents
-cp src/tools/org.opensc-project.mac.pkcs11-register.plist ${BUILDPATH}/target_startup/Library/LaunchAgents
-cp src/tools/org.opensc-project.mac.opensc-notify.plist   ${BUILDPATH}/target_startup/Library/LaunchAgents
+#mkdir -p ${BUILDPATH}/target_startup/Library/LaunchAgents
+#cp src/tools/org.opensc-project.mac.pkcs11-register.plist ${BUILDPATH}/target_startup/Library/LaunchAgents
+#cp src/tools/org.opensc-project.mac.opensc-notify.plist   ${BUILDPATH}/target_startup/Library/LaunchAgents
 
 # Build OpenSCToken if possible
 if test -e OpenSCToken -a -n "${CODE_SIGN_IDENTITY}" -a -n "${DEVELOPMENT_TEAM}"; then
@@ -189,9 +191,9 @@ fi
 
 
 # Build package
-pkgbuild --root ${BUILDPATH}/target --component-plist MacOSX/target.plist --scripts MacOSX/scripts --identifier org.opensc-project.mac --version @PACKAGE_VERSION@ --install-location / OpenSC.pkg
+pkgbuild --root ${BUILDPATH}/target --scripts MacOSX/scripts --identifier org.opensc-project.mac --version @PACKAGE_VERSION@ --install-location / OpenSC.pkg
 pkgbuild --root ${BUILDPATH}/target_tokend --component-plist MacOSX/target_tokend.plist --identifier org.opensc-project.tokend --version @PACKAGE_VERSION@ --install-location / OpenSC-tokend.pkg
-pkgbuild --root ${BUILDPATH}/target_token --component-plist MacOSX/target_token.plist --identifier org.opensc-project.mac.opensctoken --version @PACKAGE_VERSION@ --install-location / OpenSCToken.pkg
+#pkgbuild --root ${BUILDPATH}/target_token --component-plist MacOSX/target_token.plist --identifier org.opensc-project.mac.opensctoken --version @PACKAGE_VERSION@ --install-location / OpenSCToken.pkg
 pkgbuild --root ${BUILDPATH}/target_startup --component-plist MacOSX/target_startup.plist --identifier org.opensc-project.startup --version @PACKAGE_VERSION@ --install-location / OpenSC-startup.pkg
 
 # Build product
