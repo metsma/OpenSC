@@ -1458,6 +1458,8 @@ static int pcsc_detect_readers(sc_context_t *ctx)
 	}
 	rv = gpriv->SCardListReaders(gpriv->pcsc_ctx, mszGroups, reader_buf,
 			(LPDWORD) &reader_buf_size);
+	sc_log(ctx, "SCardListReaders (%d bytes):\n%s", reader_buf_size, sc_dump_hex((unsigned char *) reader_buf, reader_buf_size));
+
 	if (rv != SCARD_S_SUCCESS) {
 		PCSC_LOG(ctx, "SCardListReaders failed", rv);
 		ret = pcsc_to_opensc_error(rv);
