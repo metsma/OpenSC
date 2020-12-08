@@ -388,7 +388,7 @@ fi
 AC_MSG_RESULT([${GIT_CHECKOUT}])
 
 if test "${GIT_CHECKOUT}" = "yes"; then
-	REVISION_DESCRIPTION="$(${GIT} describe || echo '<version not available>' )"
+	REVISION_DESCRIPTION="$(${GIT} describe --tags || echo '<version not available>' )"
 	if test "${REVISION_DESCRIPTION}" = "<version not available>"; then
 		REVISION_DESCRIPTION="$(${GIT} describe --tags || echo '<version not available>')"
 	fi
