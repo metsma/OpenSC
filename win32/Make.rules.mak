@@ -3,28 +3,9 @@ OPENSC_FEATURES = pcsc
 #Include support for minidriver
 MINIDRIVER_DEF = /DENABLE_MINIDRIVER
 
-#Build MSI with the Windows Installer XML (WIX) toolkit, requires WIX >= 3.9
-!IF "$(WIX)" == ""
-# at least WiX 3.11 sets the WIX environment variable to its path
-WIX = C:\Program Files\WiX Toolset v3.10
-!ENDIF
-!IF "$(DEVENVDIR)" == "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\" || "$(DEVENVDIR)" == "C:\Program Files\Microsoft Visual Studio 10.0\Common7\IDE\"
-WIXVSVER = VS2010
-!ENDIF
-!IF "$(VISUALSTUDIOVERSION)" == "12.0"
-WIXVSVER = VS2013
-!ENDIF
-!IF "$(VISUALSTUDIOVERSION)" == "14.0"
-WIXVSVER = VS2015
-!ENDIF
-!IF "$(VISUALSTUDIOVERSION)" == "15.0"
-WIXVSVER = VS2017
-!ENDIF
-!IF "$(VISUALSTUDIOVERSION)" == "16.0"
-WIXVSVER = VS2019
-!ENDIF
-WIX_INCL_DIR = "/I$(WIX)\SDK\$(WIXVSVER)\inc"
-WIX_LIBS = "$(WIX)\SDK\$(WIXVSVER)\lib\$(PLATFORM)\dutil.lib" "$(WIX)\SDK\$(WIXVSVER)\lib\$(PLATFORM)\wcautil.lib"
+#Build MSI with the Windows Installer XML (WIX) toolkit, requires WIX >= 3.14
+WIX_INCL_DIR = "/I$(WIX)\SDK\VS2017\inc"
+WIX_LIBS = "$(WIX)\SDK\VS2017\lib\$(PLATFORM)\dutil.lib" "$(WIX)\SDK\VS2017\lib\$(PLATFORM)\wcautil.lib"
 
 # We do not build tests on windows
 #TESTS_DEF = /DENABLE_TESTS
@@ -56,26 +37,14 @@ OPENSSL_STATIC_DIR = static
 
 !IF "$(DEBUG_DEF)" == "/DDEBUG"
 !IF "$(PLATFORM)" == "x86"
-# OpenSSL 1.0.2
-#OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libeay32MTd.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
-# OpenSSL 1.1.0
 OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libcrypto32MTd.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
 !ELSE
-# OpenSSL 1.0.2
-#OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libeay32MTd.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
-# OpenSSL 1.1.0
 OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libcrypto64MTd.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
 !ENDIF
 !ELSE
 !IF "$(PLATFORM)" == "x86"
-# OpenSSL 1.0.2
-#OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libeay32MT.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
-# OpenSSL 1.1.0
 OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libcrypto32MT.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
 !ELSE
-# OpenSSL 1.0.2
-#OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libeay32MT.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
-# OpenSSL 1.1.0
 OPENSSL_LIB = $(OPENSSL_DIR)\lib\VC\$(OPENSSL_STATIC_DIR)\libcrypto64MT.lib user32.lib advapi32.lib crypt32.lib ws2_32.lib
 !ENDIF
 !ENDIF
@@ -135,38 +104,25 @@ CANDLEFLAGS = -dOpenPACE="$(OPENPACE_DIR)" $(CANDLEFLAGS)
 
 
 # Used for MiniDriver
-CNGSDK_INCL_DIR = "/IC:\Program Files (x86)\Microsoft CNG Development Kit\Include"
-CPDK_INCL_DIR   = "/IC:\Program Files (x86)\Windows Kits\10\Cryptographic Provider Development Kit\Include"
-!IF "$(PROCESSOR_ARCHITECTURE)" == "x86" && "$(PROCESSOR_ARCHITEW6432)" == ""
-CNGSDK_INCL_DIR = "/IC:\Program Files\Microsoft CNG Development Kit\Include"
-CPDK_INCL_DIR   = "/IC:\Program Files\Windows Kits\10\Cryptographic Provider Development Kit\Include"
-!ENDIF
-# Mandatory path to 'ISO C9x compliant stdint.h and inttypes.h for Microsoft Visual Studio'
-# http://msinttypes.googlecode.com/files/msinttypes-r26.zip
-# INTTYPES_INCL_DIR =  /IC:\opensc\dependencies\msys\local
+CPDK_INCL_DIR = "/IC:\Program Files (x86)\Windows Kits\10\Cryptographic Provider Development Kit\Include"
 
 # Code optimisation
 #  O1 - minimal code size
 CODE_OPTIMIZATION = /O1
-
-ALL_INCLUDES = /I$(TOPDIR)\win32 /I$(TOPDIR)\src $(OPENPACE_INCL_DIR) $(OPENSSL_INCL_DIR) $(OPENSSL_EXTRA_CFLAGS) $(ZLIB_INCL_DIR) $(LIBLTDL_INCL) $(INTTYPES_INCL_DIR) $(CPDK_INCL_DIR) $(CNGSDK_INCL_DIR) $(WIX_INCL_DIR)
+COPTS = /nologo /GS /W3 /WX /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_WARNINGS /DHAVE_CONFIG_H /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /DWIN32_LEAN_AND_MEAN /DOPENSC_FEATURES="\"$(OPENSC_FEATURES)\""
+COPTS = $(COPTS) $(OPENPACE_DEF) $(OPENSSL_DEF) $(ZLIB_DEF) $(MINIDRIVER_DEF) $(SM_DEF) $(TESTS_DEF) $(OPENSSL_EXTRA_CFLAGS)
+COPTS = $(COPTS) /I$(TOPDIR)\win32 /I$(TOPDIR)\src $(OPENPACE_INCL_DIR) $(OPENSSL_INCL_DIR) $(ZLIB_INCL_DIR) $(LIBLTDL_INCL) $(CPDK_INCL_DIR) $(WIX_INCL_DIR)
+LINKFLAGS = /NOLOGO /INCREMENTAL:NO /MACHINE:$(PLATFORM) /NXCOMPAT /DYNAMICBASE /DEBUG /NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD
+LIBFLAGS =  /nologo /machine:$(PLATFORM)
+CANDLEFLAGS = -arch $(PLATFORM) $(CANDLEFLAGS)
 
 !IF "$(DEBUG_DEF)" == "/DDEBUG"
-LINKDEBUGFLAGS = /NODEFAULTLIB:LIBCMT /DEBUG
+LINKFLAGS = $(LINKFLAGS) /NODEFAULTLIB:LIBCMT
 CODE_OPTIMIZATION =
-COPTS =  /GS /W3 /WX /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_WARNINGS /MTd /nologo /DHAVE_CONFIG_H $(ALL_INCLUDES) /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /DWIN32_LEAN_AND_MEAN $(OPENPACE_DEF) $(OPENSSL_DEF) $(ZLIB_DEF) $(MINIDRIVER_DEF) $(SM_DEF) $(TESTS_DEF) /DOPENSC_FEATURES="\"$(OPENSC_FEATURES)\"" /DDEBUG /Zi /Od
+COPTS = $(COPTS) /MTd /DDEBUG /Zi /Od
 !ELSE
-LINKDEBUGFLAGS = /NODEFAULTLIB:LIBCMTD /DEBUG /OPT:REF /OPT:ICF
-COPTS =  /GS /W3 /WX /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_WARNINGS /MT /nologo /DHAVE_CONFIG_H $(ALL_INCLUDES) /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /DWIN32_LEAN_AND_MEAN $(OPENPACE_DEF) $(OPENSSL_DEF) $(ZLIB_DEF) $(MINIDRIVER_DEF) $(SM_DEF) $(TESTS_DEF) /DOPENSC_FEATURES="\"$(OPENSC_FEATURES)\"" /Zi
-!ENDIF
-
-
-LINKFLAGS = /NOLOGO /INCREMENTAL:NO /MACHINE:$(PLATFORM) /NODEFAULTLIB:MSVCRTD  /NODEFAULTLIB:MSVCRT /NXCOMPAT /DYNAMICBASE $(LINKDEBUGFLAGS)
-LIBFLAGS =  /nologo /machine:$(PLATFORM)
-!IF "$(PLATFORM)" == "x86"
-CANDLEFLAGS = -dPlatform=x86 $(CANDLEFLAGS)
-!ELSE
-CANDLEFLAGS = -dPlatform=x64 $(CANDLEFLAGS)
+LINKFLAGS = $(LINKFLAGS) /NODEFAULTLIB:LIBCMTD /OPT:REF /OPT:ICF
+COPTS = $(COPTS) /MT /Zi
 !ENDIF
 
 .c.obj::

@@ -72,7 +72,7 @@
 #include "cardmod-mingw-compat.h"
 #endif
 
-#include "cardmod.h"
+#include <cardmod.h>
 
 #define MD_FUNC_CALLED(pCardData, level) do { \
 	logprintf(pCardData, level, "MD_Function:%s:%d called\n",__FUNCTION__, __LINE__); \

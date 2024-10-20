@@ -1,0 +1,91 @@
+name: Windows
+
+on:
+  pull_request:
+    paths:
+      - '**.c'
+      - '**.h'
+      - '**.sh'
+      - .github/workflows/windows.yml
+      - '**.am'
+      - doc/**
+      - configure.ac
+  push:
+
+permissions:
+  contents: read  #  to fetch code (actions/checkout)
+
+jobs:
+  build:
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        platform: [x86, x64]
+        configuration: [Light, Release]
+        image: [windows-2022]
+        include:
+          - configuration: Release
+            nmake: "ZLIBSTATIC_DEF=/DENABLE_ZLIB_STATIC ZLIB_INCL_DIR=/I{0}\\installed\\{1}\\include ZLIB_LIB={0}\\installed\\{1}\\lib\\zlib.lib OPENSSL_DEF=/DENABLE_OPENSSL OPENSSL_DIR={0}\\installed\\{1} OPENSSL_EXTRA_CFLAGS=/DOPENSSL_SECURE_MALLOC_SIZE=65536"
+          - configuration: Light
+            ext: "-Light"
+          - platform: x86
+            arch: win32
+          - platform: x64
+            arch: win64
+    env:
+      OPENPACE_VER: 1.1.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Git describe
+        id: ghd
+        uses: proudust/gh-describe@v2
+      - name: Package name
+        shell: bash
+        run: |
+          echo PACKAGE_NAME=OpenSC-${{ steps.ghd.outputs.tag }} >> $GITHUB_ENV
+          echo ARTIFACT=OpenSC-${{ steps.ghd.outputs.tag }}_${{ matrix.arch }}${{ matrix.ext }} >> $GITHUB_ENV
+      - name: Prepare vcpkg
+        if: matrix.configuration == 'Release'
+        uses: lukka/run-vcpkg@v7
+        with:
+          vcpkgArguments: zlib openssl
+          vcpkgGitCommitId: 18b028fe785e707265fa0e35590b7537ae1d12ea
+          vcpkgTriplet: ${{ matrix.platform }}-windows-static
+      - name: Install CPDK
+        run: choco install windows-cryptographic-provider-development-kit -y > $null
+      - name: Install autotools
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: autotools mingw-w64-x86_64-pkg-config
+      - name: Bootstrap
+        shell: msys2 {0}
+        run: ./bootstrap
+      - name: Configure
+        shell: bash
+        run: ./configure --disable-openssl --disable-readline --disable-zlib || cat config.log
+      - name: Setup dev env
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.platform }}
+      - name: Build
+        run: nmake /f Makefile.mak ${{ format(matrix.nmake, env.RUNVCPKG_VCPKG_ROOT, env.RUNVCPKG_VCPKG_TRIPLET) }}
+      - name: Installer
+        run: |
+          cd win32 && nmake /nologo /f Makefile.mak  ${{ format(matrix.nmake, env.RUNVCPKG_VCPKG_ROOT, env.RUNVCPKG_VCPKG_TRIPLET) }} OpenSC.msi
+          move OpenSC.msi "..\\OpenSC-${{ env.ARTIFACT }}.msi"
+      - name: Debug symbols
+        shell: pwsh
+        run: |
+          md ${env:ARTIFACT}-Debug
+          Get-ChildItem -recurse . -exclude vc*.pdb *.pdb | % {
+            7z a -tzip ${env:ARTIFACT}-Debug.zip $_.FullName
+          }
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi_${{ matrix.platform }}_${{ matrix.configuration }}
+          path: |
+            ./*.msi
+            ./*-Debug.zip
