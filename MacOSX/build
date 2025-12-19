@@ -189,3 +189,8 @@ do
 	fi
 done
 rm -rf ${imagedir}
+
+if test -n "${NOTARIZATION_PASSWORD}"; then
+	xcrun notarytool submit --team-id ${DEVELOPMENT_TEAM} --apple-id ${APPLE_ID} --password ${NOTARIZATION_PASSWORD} --wait OpenSC-${PACKAGE_VERSION}.dmg
+	xcrun stapler staple OpenSC-${PACKAGE_VERSION}.dmg
+fi
