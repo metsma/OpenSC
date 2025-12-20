@@ -30,7 +30,7 @@ dist_pkgdata_DATA = \
 
 AM_CPPFLAGS = -D'SC_PKCS15_PROFILE_DIRECTORY="$(pkgdatadir)"' \
 	-I$(top_srcdir)/src
-AM_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS)
+AM_CFLAGS = $(OPENSSL_CFLAGS)
 
 libpkcs15init_la_SOURCES = \
 	pkcs15-lib.c profile.c \

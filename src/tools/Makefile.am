@@ -43,7 +43,7 @@ noinst_PROGRAMS = sceac-example
 endif
 
 # compile with $(PTHREAD_CFLAGS) to allow debugging with gdb
-AM_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS) $(OPTIONAL_READLINE_CFLAGS)
+AM_CFLAGS = $(OPENSSL_CFLAGS) $(OPTIONAL_READLINE_CFLAGS)
 AM_CPPFLAGS = -I$(top_srcdir)/src -D'DEFAULT_PKCS11_PROVIDER="$(DEFAULT_PKCS11_PROVIDER)"' -D'DEFAULT_ONEPIN_PKCS11_PROVIDER="$(DEFAULT_ONEPIN_PKCS11_PROVIDER)"'
 LIBS = \
 	$(top_builddir)/src/libopensc/libopensc.la \
@@ -51,53 +51,53 @@ LIBS = \
 	$(top_builddir)/src/common/libcompat.la
 
 sceac_example_SOURCES = sceac-example.c
-sceac_example_LDADD = $(top_builddir)/src/libopensc/libopensc.la $(OPTIONAL_OPENSSL_LIBS) $(OPENPACE_LIBS)
-sceac_example_CFLAGS = -I$(top_srcdir)/src $(OPTIONAL_OPENSSL_CFLAGS) $(OPENPACE_CFLAGS)
+sceac_example_LDADD = $(top_builddir)/src/libopensc/libopensc.la $(OPENSSL_LIBS) $(OPENPACE_LIBS)
+sceac_example_CFLAGS = -I$(top_srcdir)/src $(OPENSSL_CFLAGS) $(OPENPACE_CFLAGS)
 
 opensc_tool_SOURCES = opensc-tool.c util.c
 piv_tool_SOURCES = piv-tool.c util.c
-piv_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+piv_tool_LDADD = $(OPENSSL_LIBS)
 opensc_explorer_SOURCES = opensc-explorer.c util.c
 opensc_explorer_LDADD = $(OPTIONAL_READLINE_LIBS)
 pkcs15_tool_SOURCES = pkcs15-tool.c util.c ../pkcs11/pkcs11-display.c ../pkcs11/pkcs11-display.h
-pkcs15_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+pkcs15_tool_LDADD = $(OPENSSL_LIBS)
 pkcs11_tool_SOURCES = pkcs11-tool.c util.c pkcs11_uri.c
-pkcs11_tool_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS) $(PTHREAD_CFLAGS)
+pkcs11_tool_CFLAGS = $(OPENSSL_CFLAGS) $(PTHREAD_CFLAGS)
 pkcs11_tool_LDADD = \
 	$(top_builddir)/src/common/libpkcs11.la \
-	$(OPTIONAL_OPENSSL_LIBS)
+	$(OPENSSL_LIBS)
 if ENABLE_SHARED
 else
 pkcs11_tool_LDADD += \
 	$(top_builddir)/src/pkcs11/libopensc-pkcs11.la
 endif
 pkcs15_crypt_SOURCES = pkcs15-crypt.c util.c
-pkcs15_crypt_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+pkcs15_crypt_LDADD = $(OPENSSL_LIBS)
 cryptoflex_tool_SOURCES = cryptoflex-tool.c util.c
-cryptoflex_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+cryptoflex_tool_LDADD = $(OPENSSL_LIBS)
 pkcs15_init_SOURCES = pkcs15-init.c util.c
-pkcs15_init_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+pkcs15_init_LDADD = $(OPENSSL_LIBS)
 cardos_tool_SOURCES = cardos-tool.c util.c
-cardos_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+cardos_tool_LDADD = $(OPENSSL_LIBS)
 eidenv_SOURCES = eidenv.c util.c
 netkey_tool_SOURCES = netkey-tool.c
-netkey_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+netkey_tool_LDADD = $(OPENSSL_LIBS)
 westcos_tool_SOURCES = westcos-tool.c util.c
-westcos_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+westcos_tool_LDADD = $(OPENSSL_LIBS)
 openpgp_tool_SOURCES = openpgp-tool.c util.c openpgp-tool-helpers.c
-openpgp_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+openpgp_tool_LDADD = $(OPENSSL_LIBS)
 iasecc_tool_SOURCES = iasecc-tool.c util.c
-iasecc_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+iasecc_tool_LDADD = $(OPENSSL_LIBS)
 sc_hsm_tool_SOURCES = sc-hsm-tool.c util.c fread_to_eof.c
-sc_hsm_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+sc_hsm_tool_LDADD = $(OPENSSL_LIBS)
 dnie_tool_SOURCES = dnie-tool.c util.c
-dnie_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+dnie_tool_LDADD = $(OPENSSL_LIBS)
 gids_tool_SOURCES = gids-tool.c util.c
-gids_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+gids_tool_LDADD = $(OPENSSL_LIBS)
 
 npa_tool_SOURCES = npa-tool.c fread_to_eof.c util.c npa-tool-cmdline.c
-npa_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS) $(OPENPACE_LIBS)
-npa_tool_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS) $(OPENPACE_CFLAGS)
+npa_tool_LDADD = $(OPENSSL_LIBS) $(OPENPACE_LIBS)
+npa_tool_CFLAGS = $(OPENSSL_CFLAGS) $(OPENPACE_CFLAGS)
 if HAVE_UNKNOWN_WARNING_OPTION
 npa_tool_CFLAGS += -Wno-unknown-warning-option
 endif

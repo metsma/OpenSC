@@ -17,12 +17,12 @@ OPENSC_PKCS11_SRC = pkcs11-global.c pkcs11-session.c pkcs11-object.c misc.c slot
 	framework-pkcs15init.c debug.c pkcs11.exports \
 	pkcs11-display.c pkcs11-display.h
 OPENSC_PKCS11_CFLAGS = \
-	$(OPENPACE_CFLAGS) $(OPTIONAL_OPENSSL_CFLAGS) $(OPENSC_PKCS11_PTHREAD_CFLAGS)
+	$(OPENPACE_CFLAGS) $(OPENSSL_CFLAGS) $(OPENSC_PKCS11_PTHREAD_CFLAGS)
 OPENSC_PKCS11_LIBS = \
 	$(top_builddir)/src/libopensc/libopensc.la \
 	$(top_builddir)/src/common/libscdl.la \
 	$(top_builddir)/src/common/libcompat.la \
-	$(OPENPACE_LIBS) $(OPTIONAL_OPENSSL_LIBS) $(PTHREAD_LIBS)
+	$(OPENPACE_LIBS) $(OPENSSL_LIBS) $(PTHREAD_LIBS)
 if WIN32
 OPENSC_PKCS11_LIBS += -lshlwapi
 endif
@@ -49,12 +49,12 @@ libopensc_pkcs11_la_LIBADD = $(OPENSC_PKCS11_LIBS)
 libopensc_pkcs11_la_LDFLAGS = $(AM_LDFLAGS)
 
 pkcs11_spy_la_SOURCES = pkcs11-spy.c pkcs11-display.c pkcs11-display.h pkcs11.exports
-pkcs11_spy_la_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS) $(OPENSC_PKCS11_PTHREAD_CFLAGS)
+pkcs11_spy_la_CFLAGS = $(OPENSSL_CFLAGS) $(OPENSC_PKCS11_PTHREAD_CFLAGS)
 pkcs11_spy_la_LIBADD = \
 	$(top_builddir)/src/common/libpkcs11.la \
 	$(top_builddir)/src/common/libscdl.la \
 	$(top_builddir)/src/common/libcompat.la \
-	$(OPTIONAL_OPENSSL_LIBS) $(PTHREAD_LIBS)
+	$(OPENSSL_LIBS) $(PTHREAD_LIBS)
 pkcs11_spy_la_LDFLAGS = $(AM_LDFLAGS) \
 	-export-symbols "$(srcdir)/pkcs11.exports" \
 	-module -shared -avoid-version -no-undefined

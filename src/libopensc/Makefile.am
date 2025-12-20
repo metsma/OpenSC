@@ -20,7 +20,7 @@ AM_CPPFLAGS = -D'OPENSC_CONF_PATH="$(sysconfdir)/opensc.conf"' \
      -D'DEFAULT_SM_MODULE_PATH="$(DEFAULT_SM_MODULE_PATH)"' \
      -D'DEFAULT_SM_MODULE="$(DEFAULT_SM_MODULE)"' \
 	-I$(top_srcdir)/src
-AM_CFLAGS = $(OPENPACE_CFLAGS) $(OPTIONAL_OPENSSL_CFLAGS) $(OPTIONAL_OPENCT_CFLAGS) \
+AM_CFLAGS = $(OPENPACE_CFLAGS) $(OPENSSL_CFLAGS) $(OPTIONAL_OPENCT_CFLAGS) \
 	$(OPTIONAL_PCSC_CFLAGS) $(OPTIONAL_ZLIB_CFLAGS)
 AM_OBJCFLAGS = $(AM_CFLAGS)
 
@@ -76,7 +76,7 @@ libopensc_static_la_SOURCES = $(libopensc_la_SOURCES_BASE)
 if WIN32
 libopensc_la_SOURCES += $(top_builddir)/win32/versioninfo.rc
 endif
-libopensc_la_LIBADD = $(OPENPACE_LIBS) $(OPTIONAL_OPENSSL_LIBS) \
+libopensc_la_LIBADD = $(OPENPACE_LIBS) $(OPENSSL_LIBS) \
 	$(OPTIONAL_OPENCT_LIBS) $(OPTIONAL_ZLIB_LIBS) \
 	$(top_builddir)/src/pkcs15init/libpkcs15init.la \
 	$(top_builddir)/src/scconf/libscconf.la \

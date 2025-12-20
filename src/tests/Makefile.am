@@ -7,7 +7,7 @@ SUBDIRS = regression p11test fuzzing unittests
 noinst_PROGRAMS = base64 lottery p15dump pintest prngtest
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
-AM_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS)
+AM_CFLAGS = $(OPENSSL_CFLAGS)
 LIBS = \
 	$(top_builddir)/src/libopensc/libopensc.la \
 	$(top_builddir)/src/common/libscdl.la \

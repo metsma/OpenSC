@@ -25,13 +25,13 @@ noinst_HEADERS = torture.h
 
 AM_CFLAGS = -I$(top_srcdir)/src/ \
 	$(CODE_COVERAGE_CFLAGS) \
-	$(OPTIONAL_OPENSSL_CFLAGS) \
+	$(OPENSSL_CFLAGS) \
 	$(CMOCKA_CFLAGS)
 AM_CPPFLAGS =$(CODE_COVERAGE_CPPFLAGS)
 LDADD = $(top_builddir)/src/libopensc/libopensc.la \
 	$(top_builddir)/src/common/libscdl.la \
 	$(CODE_COVERAGE_LIBS) \
-	$(OPTIONAL_OPENSSL_LIBS) \
+	$(OPENSSL_LIBS) \
 	$(CMOCKA_LIBS)
 
 asn1_SOURCES = asn1.c

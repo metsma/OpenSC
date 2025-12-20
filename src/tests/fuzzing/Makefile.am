@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src -D'SC_PKCS15_PROFILE_DIRECTORY="$(pkgdatadir)"' \
 				-D'DEFAULT_PKCS11_PROVIDER="$(DEFAULT_PKCS11_PROVIDER)"'
-AM_CFLAGS = -g -O0 $(OPTIONAL_OPENSSL_CFLAGS) $(OPTIONAL_READLINE_CFLAGS) $(PTHREAD_CFLAGS)
+AM_CFLAGS = -g -O0 $(OPENSSL_CFLAGS) $(OPTIONAL_READLINE_CFLAGS) $(PTHREAD_CFLAGS)
 LIBS = $(FUZZING_LIBS)\
 	$(top_builddir)/src/libopensc/libopensc.la \
 	$(top_builddir)/src/common/libscdl.la \
@@ -36,23 +36,23 @@ fuzz_pkcs15_decode_SOURCES = fuzz_pkcs15_decode.c fuzzer_reader.c $(ADDITIONAL_S
 fuzz_pkcs15_reader_SOURCES = fuzz_pkcs15_reader.c fuzzer_reader.c $(ADDITIONAL_SRC)
 fuzz_scconf_parse_string_SOURCES = fuzz_scconf_parse_string.c $(ADDITIONAL_SRC)
 fuzz_pkcs15init_SOURCES = fuzz_pkcs15init.c fuzzer_reader.c $(ADDITIONAL_SRC)
-fuzz_pkcs15init_LDADD = $(OPTIONAL_OPENSSL_LIBS) $(OPENPACE_LIBS)
+fuzz_pkcs15init_LDADD = $(OPENSSL_LIBS) $(OPENPACE_LIBS)
 fuzz_pkcs15init_LDFLAGS = -static
 fuzz_pkcs15_encode_SOURCES = fuzz_pkcs15_encode.c fuzzer_reader.c $(ADDITIONAL_SRC)
 fuzz_card_SOURCES = fuzz_card.c fuzzer_reader.c $(ADDITIONAL_SRC)
 fuzz_piv_tool_SOURCES = fuzz_piv_tool.c fuzzer_reader.c fuzzer_tool.c $(ADDITIONAL_SRC) \
 						 ../../tools/util.c
-fuzz_piv_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+fuzz_piv_tool_LDADD = $(OPENSSL_LIBS)
 fuzz_pkcs15_tool_SOURCES = fuzz_pkcs15_tool.c fuzzer_reader.c fuzzer_tool.c $(ADDITIONAL_SRC) \
 							../../tools/util.c ../../pkcs11/pkcs11-display.c
-fuzz_pkcs15_tool_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+fuzz_pkcs15_tool_LDADD = $(OPENSSL_LIBS)
 fuzz_pkcs15_crypt_SOURCES = fuzz_pkcs15_crypt.c fuzzer_reader.c fuzzer_tool.c $(ADDITIONAL_SRC) \
 							../../tools/util.c
-fuzz_pkcs15_crypt_LDADD = $(OPTIONAL_OPENSSL_LIBS)
+fuzz_pkcs15_crypt_LDADD = $(OPENSSL_LIBS)
 fuzz_pkcs11_SOURCES = fuzz_pkcs11.c fuzzer_reader.c fuzzer_tool.c $(ADDITIONAL_SRC)
-fuzz_pkcs11_CFLAGS = $(OPTIONAL_OPENSSL_CFLAGS) $(PTHREAD_CFLAGS)
+fuzz_pkcs11_CFLAGS = $(OPENSSL_CFLAGS) $(PTHREAD_CFLAGS)
 fuzz_pkcs11_LDADD = \
 	$(top_builddir)/src/common/libpkcs11.la \
-	$(OPTIONAL_OPENSSL_LIBS) \
+	$(OPENSSL_LIBS) \
 	$(top_builddir)/src/pkcs11/libopensc-pkcs11.la
 fuzz_pkcs11_uri_SOURCES = fuzz_pkcs11_uri.c ../../tools/pkcs11_uri.c $(ADDITIONAL_SRC)
